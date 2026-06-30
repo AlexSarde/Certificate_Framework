@@ -51,7 +51,7 @@ class SimulationWorker(QThread):
 class CertificateApp(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Certificate Pricing Engine")
+        self.setWindowTitle("Certificate Pricing Engine v1.1.0")
         self.resize(1100, 800)
 
         self.data_dir = ""
@@ -304,15 +304,31 @@ class CertificateApp(QMainWindow):
         self.last_results = res
 
         summary = res["summary"]
-        text = "=== Simulation Results ===\n"
-        if "fair_value" in summary and not pd.isna(summary["fair_value"]):
-            text += f"Fair Value (Discounted): {summary['fair_value']:.4f} (Std Error: {summary.get('fv_std_error', 0):.4f})\n"
-        text += f"Expected Payoff: {summary.get('expected_payoff', 0):.2f}\n"
-        text += f"Prob of Profit: {summary.get('prob_profit', 0):.2%}\n"
-        text += f"Prob Loss: {summary.get('prob_loss', 0):.2%}\n"
-        text += f"Prob Barrier Breach: {summary.get('prob_breach_barrier', 0):.2%}\n"
-        text += f"Prob Autocall: {summary.get('prob_autocall', 0):.2%}\n"
         
+        text = "=== Pricing & Analytics ===\n"
+        if not pd.isna(summary.get("fair_value")):
+            text += f"Fair Value (Discounted): {summary['fair_value']:.4f} (Err: {summary['fv_std_error']:.4f})\n\n"
+        
+        text += "--- P&L Distribution ---\n"
+        text += f"Avg Total P&L: {summary['C_avg_total_PL']:.2f}\n"
+        text += f"P&L (5% / 50% / 95%): {summary['C_PL_5pct']:.2f} / {summary['C_PL_50pct']:.2f} / {summary['C_PL_95pct']:.2f}\n"
+        text += f"Coupons (5% / 50% / 95%): {summary['C_coupons_5pct']:.2f} / {summary['C_coupons_50pct']:.2f} / {summary['C_coupons_95pct']:.2f}\n\n"
+
+        text += "--- Barrier & Capital Risk ---\n"
+        text += f"Prob Touch Barrier: {summary['A_prob_touch_barrier']:.2%}\n"
+        text += f"Avg Times Below Barrier: {summary['A_avg_times_below_barrier']:.1f}\n"
+        text += f"Prob Capital Loss: {summary['B_prob_capital_loss']:.2%}\n"
+        text += f"Avg Capital Loss Pct: {summary['B_avg_capital_loss_pct']:.2%}\n\n"
+        
+        text += "--- Portfolio Tail Risk ---\n"
+        text += f"VaR (95% / 99%): {summary['VaR_95_portfolio']:.2f} / {summary['VaR_99_portfolio']:.2f}\n"
+        text += f"ES  (95% / 99%): {summary['ES_95_portfolio']:.2f} / {summary['ES_99_portfolio']:.2f}\n"
+        text += f"Drawdown (Avg / 95%): {summary['D_max_drawdown_mean']:.2%} / {summary['D_max_drawdown_95pct']:.2%}\n"
+
+        for t in res["tickers"]:
+            if f"{t}_VaR_95" in summary:
+                text += f"\n[{t}] VaR 95%: {summary[f'{t}_VaR_95']:.2%} | ES 95%: {summary[f'{t}_ES_95']:.2%}"
+
         self.txt_results.setText(text)
         self.plot_results(res)
 
