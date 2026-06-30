@@ -319,7 +319,7 @@ def price_certificate(sim: dict, spec: CertificateSpec, *, discount_rate: float 
 
 def run_simulation(data_dir: str, spec: CertificateSpec, risk_free_rate: float, 
                    dividend_yields: dict, mode: str="risk_neutral", corr_blend: float=1.0, 
-                   n_days: int=504, n_paths: int=10000, seed: int=42, progress_callback=None) -> dict:
+                   n_days: int=756, n_paths: int=20000, seed: int=42, progress_callback=None) -> dict:
     if progress_callback: progress_callback(0)
     
     data_path = Path(data_dir)
