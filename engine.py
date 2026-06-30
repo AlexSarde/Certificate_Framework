@@ -298,7 +298,7 @@ def price_certificate(sim: dict, spec: CertificateSpec, *, discount_rate: float 
 
     # Single Asset VaR/ES at maturity
     for i, t in enumerate(tickers):
-        ret_t = ratios[-1, :] - 1.0 # return at maturity
+        ret_t = ratios[i, -1, :] - 1.0 # return at maturity
         summary[f"{t}_VaR_95"] = float(-np.percentile(ret_t, 5))
         summary[f"{t}_ES_95"] = float(-ret_t[ret_t <= np.percentile(ret_t, 5)].mean())
 
